@@ -1,0 +1,41 @@
+# Bytecode and python caches
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Sessions and runtime temporary directories
+sessions/
+thumb_cache/
+image_holder/
+temp_index/
+trash/
+persist/
+
+# Data and logs
+data/*
+!data/.keep
+*.log
+logs/
+server.log
+.server.pid
+
+# Config and user backups
+config/*
+!config/.keep
+backups/*
+!backups/.keep
+exports/*
+!exports/.keep
+
+# Media files
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+*.heic
+*.zip
+
+# OS and environment
+.DS_Store
+.nomedia

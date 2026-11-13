@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!-- Name: index.html | Image-ProHasher group_viewer UI | Version: 106 | Date Modified: 2026-10-24 | Author: Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton | RELATIONAL_ID: 3c8e51a7-d204-4b9f-a6e1-59f0b7d2c418 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Image Group Viewer</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/becss-core.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/gv-app.css') }}">
+</head>
+<body data-session="{{ selected_session }}" data-version="{{ script_version }}">
+
+<header class="gv-header">
+  <button class="gv-burger" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <button class="gv-back" id="btnBack" hidden aria-label="Back to all groups">&larr;<span class="gv-back__txt"> Groups</span></button>
+  <div class="gv-logo">Group<span>Viewer</span></div>
+  <span class="gv-spacer"></span>
+  <label class="gv-session-wrap"><span class="gv-sr">Session</span>
+    <select id="sessionSelect" class="gv-session" aria-label="Session">
+      {% for s in sessions %}<option value="{{ s.id }}" {% if s.id == selected_session %}selected{% endif %}>{{ s.label }}</option>{% endfor %}
+    </select>
+  </label>
+</header>
+
+<nav class="gv-toolbar" id="toolbar" aria-label="Actions"></nav>
+<div class="gv-banner" id="banner" role="status" hidden></div>
+
+<div class="gv-shell">
+  <aside class="gv-side" id="sidebar" aria-label="Main navigation">
+    <div class="gv-nav" id="sideNav">
+      <button class="gv-nav__item" data-view="groups">Groups</button>
+      <button class="gv-nav__item" data-view="trash">Trash</button>
+      <button class="gv-nav__item" data-view="notes">Debug notes</button>
+      <button class="gv-nav__item" data-view="about">About &amp; help</button>
+      <button class="gv-nav__item gv-nav__item--out" id="btnSignOut">Sign out</button>
+    </div>
+    <div class="gv-stats" id="statsPanel">Loading...</div>
+  </aside>
+  <div class="gv-overlay" id="sidebarOverlay"></div>
+
+  <main class="gv-main" id="main">
+    <section id="viewGroups" class="gv-view">
+      <div id="groupListView">
+        <div class="gv-searchrow">
+          <input id="filterInput" type="search" placeholder="Search by file name..." aria-label="Search groups by file name" autocomplete="off">
+        </div>
+        <div class="gv-summary" id="listSummary" aria-live="polite"></div>
+        <div id="groupCards" class="gv-cards"></div>
+        <div id="emptyState" class="gv-empty" hidden></div>
+        <button id="btnMore" class="gv-btn gv-more" hidden>Load more groups</button>
+      </div>
+      <div id="groupDetailView" hidden>
+        <div class="gv-detail-head">
+          <div class="gv-detail-title">
+            <h2 id="groupDetailTitle" class="gv-h"></h2>
+            <div id="groupBasis" class="gv-basis"></div>
+          </div>
+          <div class="gv-detail-ctrls">
+            <button id="btnExpand" class="gv-btn" hidden></button>
+            <div class="gv-pager" role="group" aria-label="Group navigation">
+              <button id="btnPrev" class="gv-btn gv-btn--icon" aria-label="Previous group">&lsaquo;</button>
+              <span id="pagerText" class="gv-muted"></span>
+              <button id="btnNext" class="gv-btn gv-btn--icon" aria-label="Next group">&rsaquo;</button>
+            </div>
+            <div class="gv-density" role="group" aria-label="Thumbnail size">
+              <button data-density="s" class="gv-btn gv-btn--icon" aria-label="Small thumbnails">S</button>
+              <button data-density="m" class="gv-btn gv-btn--icon" aria-label="Medium thumbnails">M</button>
+              <button data-density="l" class="gv-btn gv-btn--icon" aria-label="Large thumbnails">L</button>
+            </div>
+          </div>
+        </div>
+        <div class="gv-grid" id="tileGrid" role="group" aria-label="Images in this group"></div>
+      </div>
+    </section>
+
+    <section id="viewTrash" class="gv-view" hidden>
+      <h2 class="gv-h">Trash <span id="trashTotal" class="gv-muted"></span></h2>
+      <p class="gv-muted">Files you trashed here are kept in this session's trash until you empty it. Restore puts them back where they came from.</p>
+      <div id="trashRows"></div>
+    </section>
+
+    <section id="viewNotes" class="gv-view" hidden>
+      <h2 class="gv-h">Debug notes <span id="notesState" class="gv-muted"></span></h2>
+      <p class="gv-muted">Saved automatically to dev/persistent-notes.md.</p>
+      <textarea id="notesBox" class="gv-notes" spellcheck="false" aria-label="Debug notes"></textarea>
+    </section>
+
+    <section id="viewAbout" class="gv-view" hidden>
+      <h2 class="gv-h">About &amp; help</h2>
+      <div class="gv-about">
+        <p><strong>Image-ProHasher &mdash; group_viewer.py</strong> v{{ script_version }} &middot; {{ date_modified }}</p>
+        <p>Review duplicate-image groups built by CLI_Image_Grouper.py. Each group says <em>why</em> it was formed. <strong>Verify</strong> hashes just that group to prove which files are byte-identical.</p>
+        <h3>How to review</h3>
+        <ol>
+          <li>Open a group. Tap images to select them (tap &#10530; to view full size).</li>
+          <li>Use <strong>Keep &#9662;</strong> to keep one by a rule and queue the rest for trash, or select images and press <strong>Trash / Move / Copy</strong>.</li>
+          <li>Nothing happens to your files until you press <strong>Review</strong> and <strong>Commit</strong>. Trashed files can be restored.</li>
+        </ol>
+        <h3>Keyboard shortcuts</h3>
+        <table class="gv-keys">
+          <tr><td><kbd>J</kbd> / <kbd>&rarr;</kbd></td><td>Next group</td></tr>
+          <tr><td><kbd>K</kbd> / <kbd>&larr;</kbd></td><td>Previous group</td></tr>
+          <tr><td><kbd>A</kbd></td><td>Select all images in the group</td></tr>
+          <tr><td><kbd>T</kbd> / <kbd>Del</kbd></td><td>Queue selected for trash</td></tr>
+          <tr><td><kbd>V</kbd></td><td>Verify group</td></tr>
+          <tr><td><kbd>R</kbd></td><td>Mark resolved and go to next group</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>Close dialog / clear selection</td></tr>
+          <tr><td><kbd>?</kbd></td><td>Show this help</td></tr>
+        </table>
+        <p class="gv-credit">{{ author_credit }}</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- selection bar: thumb-reachable, appears only while something is selected -->
+<div class="gv-selbar" id="selBar" role="toolbar" aria-label="Actions for selected images" hidden></div>
+<button class="gv-pill" id="pendingPill" hidden></button>
+<div class="gv-toast" id="toast" role="status" aria-live="polite" hidden><span id="toastText"></span><button id="toastAction" hidden></button></div>
+
+<div class="gv-modal-backdrop" id="lightboxBackdrop"><div class="gv-modal gv-lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <div class="gv-lb-row" id="lightboxRow"></div>
+  <div class="gv-lb-bar" id="lightboxBar"></div>
+</div></div>
+
+<div class="gv-modal-backdrop" id="browserBackdrop"><div class="gv-modal" role="dialog" aria-modal="true" aria-label="Choose folder">
+  <h3 class="gv-h" id="browserTitle">Choose a folder</h3>
+  <div class="gv-browser-path" id="browserPath"></div>
+  <div id="browserGrid" class="gv-browser-list"></div>
+  <div class="gv-modal-actions"><button id="btnUseFolder" class="gv-btn gv-btn--primary">Use this folder</button><button id="btnCancelBrowse" class="gv-btn">Cancel</button></div>
+</div></div>
+
+<div class="gv-modal-backdrop" id="dialogBackdrop"><div class="gv-modal" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+  <h3 class="gv-h" id="dialogTitle"></h3>
+  <div id="dialogBody"></div>
+  <div class="gv-modal-actions" id="dialogActions"></div>
+</div></div>
+
+<div class="gv-menu" id="popMenu" role="menu"></div>
+
+<footer class="gv-footer"><span>group_viewer.py v{{ script_version }}</span><span class="gv-footer__credit">{{ author_credit }}</span></footer>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

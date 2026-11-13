@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<!-- Name: login.html | Image-ProHasher group_viewer UI | Version: 108 | Date Modified: 2026-11-13 | Author: Elton Boehnen · boehnenelton2024@gmail.com · boehnenelton2024.pages.dev · github.com/boehnenelton | RELATIONAL_ID: f7ebbef8-9f3e-4c6f-8087-c55ece4056ee -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Image Group Viewer - Sign in</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/becss-core.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/gv-app.css') }}">
+</head>
+<body class="gv-login-body">
+  <div class="gv-login-box">
+    <h1>Image Group Viewer</h1>
+    <p>Sign in with your username &amp; password or access token.</p>
+    {% if error %}<p class="gv-error">{{ error }}</p>{% endif %}
+    <form method="post" action="/login" autocomplete="off">
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+        <input type="text" name="username" placeholder="Username (default: admin)" autocomplete="username" value="{{ default_user or 'admin' }}">
+        <input type="password" name="password" placeholder="Password (default: changeme)" autocomplete="current-password">
+        <input type="text" name="token" placeholder="Or enter Access Token" autocomplete="off" autofocus>
+      </div>
+      <button type="submit">Continue</button>
+    </form>
+    <div class="gv-hint">v{{ script_version }} &middot; Defaults: <b>admin</b> / <b>changeme</b> (like BEJSON CMS) &middot; Session is kept in a secure cookie.<br><br>Credentials can be configured via <b>viewer_user</b> / <b>viewer_password</b> in <b>config/config.104a.bejson</b> or environment variables <b>VIEWER_USER</b> / <b>VIEWER_PASSWORD</b>. Access token remains accepted.</div>
+  </div>
+</body>
+</html>
